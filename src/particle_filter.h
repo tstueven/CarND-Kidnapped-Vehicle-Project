@@ -59,7 +59,7 @@ public:
 
     /**
      * init Initializes particle filter by initializing particles_ to Gaussian
-     *   distribution around first position and all the weights to 1.
+     *   distribution around first position and all the weights_ to 1.
      * @param x Initial x position [m] (simulated estimate from GPS)
      * @param y Initial y position [m]
      * @param theta Initial orientation [rad]
@@ -90,7 +90,7 @@ public:
                          std::vector<LandmarkObs> &observations);
 
     /**
-     * updateWeights Updates the weights for each particle based on the likelihood
+     * updateWeights Updates the weights_ for each particle based on the likelihood
      *   of the observed measurements.
      * @param sensor_range Range [m] of sensor
      * @param std_landmark[] Array of dimension 2
@@ -143,8 +143,8 @@ private:
     // Flag, if filter is initialized
     bool is_initialized;
 
-    // Vector of weights of all particles_
-    std::vector<double> weights;
+    // Vector of weights_ of all particles_
+    std::vector<double> weights_;
 
     std::default_random_engine gen_{};
 };

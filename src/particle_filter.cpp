@@ -42,7 +42,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[])
         p.id = i;
         p.weight = 1;
         particles_.push_back(std::move(p));
-        weights.push_back(1);
+        weights_.push_back(1);
     }
 
     is_initialized = true;
@@ -106,7 +106,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                                    const Map &map_landmarks)
 {
     /**
-     * TODO: Update the weights of each particle using a mult-variate Gaussian
+     * TODO: Update the weights_ of each particle using a mult-variate Gaussian
      *   distribution. You can read more about this distribution here:
      *   https://en.wikipedia.org/wiki/Multivariate_normal_distribution
      * NOTE: The observations are given in the VEHICLE'S coordinate system.
@@ -119,6 +119,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
      *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
      */
     const double sensor_range_sq = sensor_range * sensor_range;
+    this->weights_.clear();
 
     for (auto &p : particles_)
     {
@@ -158,19 +159,19 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
             weight = weight > 1e-8 ? weight : 1e-8;
             p.weight *= weight;
         }
+        this->weights_.push_back(p.weight);
     }
 }
 
 void ParticleFilter::resample()
 {
-    /**
-     * TODO: Resample particles_ with replacement with probability proportional
-     *   to their weight.
-     * NOTE: You may find std::discrete_distribution helpful here.
-     *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
-     */
-     
+    std::discrete_distribution<> dist(weights_.begin(), weights_.end());
 
+    auto old_particles = this->particles_;
+    for (auto &particle : particles_)
+    {
+        particle = old_particles[dist(gen_)];
+    }
 }
 
 void ParticleFilter::SetAssociations(Particle &particle,

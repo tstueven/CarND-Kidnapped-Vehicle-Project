@@ -297,7 +297,7 @@ inline std::tuple<double, double> rotate_local_to_global(double x, double y, dou
     double cos_t = std::cos(theta);
     double sin_t = std::sin(theta);
     double new_x = x * cos_t - y * sin_t;
-    double new_y = x * sin_t + cos_t;
+    double new_y = x * sin_t + y * cos_t;
     return {new_x, new_y};
 }
 
@@ -306,7 +306,7 @@ inline std::tuple<double, double> rotate_global_to_local(double x, double y, dou
     double cos_t = std::cos(theta);
     double sin_t = std::sin(theta);
     double new_x = x * cos_t + y * sin_t;
-    double new_y = -x * sin_t + cos_t;
+    double new_y = -x * sin_t + y * cos_t;
     return {new_x, new_y};
 }
 

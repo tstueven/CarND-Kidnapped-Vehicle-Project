@@ -107,7 +107,7 @@ int main() {
             noisy_observations.push_back(obs);
           }
 
-          // Update the weights and resample
+          // Update the weights_ and resample
           pf.updateWeights(sensor_range, sigma_landmark, noisy_observations, map);
           pf.resample();
 
