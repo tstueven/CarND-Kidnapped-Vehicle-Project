@@ -105,19 +105,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                                    const vector<LandmarkObs> &observations,
                                    const Map &map_landmarks)
 {
-    /**
-     * TODO: Update the weights_ of each particle using a mult-variate Gaussian
-     *   distribution. You can read more about this distribution here:
-     *   https://en.wikipedia.org/wiki/Multivariate_normal_distribution
-     * NOTE: The observations are given in the VEHICLE'S coordinate system.
-     *   Your particles_ are located according to the MAP'S coordinate system.
-     *   You will need to transform between the two systems. Keep in mind that
-     *   this transformation requires both rotation AND translation (but no scaling).
-     *   The following is a good resource for the theory:
-     *   https://www.willamette.edu/~gorr/classes/GeneralGraphics/Transforms/transforms2d.htm
-     *   and the following is a good resource for the actual equation to implement
-     *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
-     */
     const double sensor_range_sq = sensor_range * sensor_range;
     this->weights_.clear();
 
@@ -131,14 +118,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                 landmarks_in_range.emplace_back(landmark.id_i, landmark.x_f, landmark.y_f);
             }
         }
-
-//        vector<LandmarkObs> global_observations{};
-//        global_observations.reserve(observations.size());
-//        for (const auto &local_obs : observations)
-//        {
-//            global_observations.emplace_back(p.obervation_to_global(local_obs));
-//        }
-//        dataAssociation(landmarks_in_range, global_observations);
 
         // I chose this way since I think the landmark measurement uncertainty has to be dealt with
         // in particle coordinates.
