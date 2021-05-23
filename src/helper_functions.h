@@ -59,8 +59,14 @@ struct LandmarkObs
     int id;     // Id of matching landmark in the map.
     double x;   // Local (vehicle coords) x position of landmark observation [m]
     double y;   // Local (vehicle coords) y position of landmark observation [m]
+    double dist_to_nearest_x; // x dist to closest landmark
+    double dist_to_nearest_y; // y dist to closest landmark
 
-    double dist_sq(const LandmarkObs &other)
+    LandmarkObs() = default;
+
+    LandmarkObs(int id, double x, double y) : id{id}, x{x}, y{y} {}
+
+    double dist_sq(const LandmarkObs &other) const
     {
         return ::dist_sq(x, y, other.x, other.y);
     }
@@ -241,7 +247,7 @@ inline bool read_gt_data(std::string filename, std::vector<ground_truth> &gt)
  * @param filename Name of file containing landmark observation measurements.
  * @output True if opening and reading file was successful
  */
-inline bool read_landmark_data(std::string filename,
+inline bool read_landmark_data(const std::string &filename,
                                std::vector<LandmarkObs> &observations)
 {
     // Get file of landmark measurements
@@ -284,6 +290,35 @@ inline bool read_landmark_data(std::string filename,
 inline double angle_to_interval(double phi)
 {
     return atan2(sin(phi), cos(phi));
+}
+
+inline std::tuple<double, double> rotate_local_to_global(double x, double y, double theta)
+{
+    double cos_t = std::cos(theta);
+    double sin_t = std::sin(theta);
+    double new_x = x * cos_t - y * sin_t;
+    double new_y = x * sin_t + cos_t;
+    return {new_x, new_y};
+}
+
+inline std::tuple<double, double> rotate_global_to_local(double x, double y, double theta)
+{
+    double cos_t = std::cos(theta);
+    double sin_t = std::sin(theta);
+    double new_x = x * cos_t + y * sin_t;
+    double new_y = -x * sin_t + cos_t;
+    return {new_x, new_y};
+}
+
+inline double gaussian(double dist_x, double dist_y, double sigma_x, double sigma_y)
+{
+    double dist_x_sq = dist_x * dist_x;
+    double dist_y_sq = dist_y * dist_y;
+    double sigma_x_sq = sigma_x * sigma_x;
+    double sigma_y_sq = sigma_y * sigma_y;
+    double normalizer = 1. / (2 * M_PI * sigma_x * sigma_y);
+    return normalizer *
+           std::exp(-1 * (dist_x_sq / (2 * sigma_x_sq) + dist_y_sq / (2 * sigma_y_sq)));
 }
 
 #endif  // HELPER_FUNCTIONS_H_

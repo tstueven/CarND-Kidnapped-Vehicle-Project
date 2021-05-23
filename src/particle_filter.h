@@ -24,6 +24,26 @@ struct Particle
     std::vector<int> associations;
     std::vector<double> sense_x;
     std::vector<double> sense_y;
+
+    LandmarkObs obervation_to_global(const LandmarkObs &obs)
+    {
+        LandmarkObs out = obs;
+        auto[rot_x, rot_y] = rotate_local_to_global(obs.x, obs.y, this->theta);
+        out.x = this->x + rot_x;
+        out.y = this->y + rot_y;
+        return out;
+    }
+
+    LandmarkObs landmark_to_local(const LandmarkObs &obs)
+    {
+        LandmarkObs out = obs;
+        auto[rot_x, rot_y] = rotate_global_to_local(obs.x - this->x, obs.y - this->y,
+                                                    this->theta);
+        out.x = rot_x;
+        out.y = rot_y;
+        return out;
+    }
+
 };
 
 
@@ -31,14 +51,14 @@ class ParticleFilter
 {
 public:
     // Constructor
-    // @param num_particles Number of particles
+    // @param num_particles Number of particles_
     ParticleFilter() : num_particles(0), is_initialized(false) {}
 
     // Destructor
     ~ParticleFilter() = default;
 
     /**
-     * init Initializes particle filter by initializing particles to Gaussian
+     * init Initializes particle filter by initializing particles_ to Gaussian
      *   distribution around first position and all the weights to 1.
      * @param x Initial x position [m] (simulated estimate from GPS)
      * @param y Initial y position [m]
@@ -66,7 +86,7 @@ public:
      * @param predicted Vector of predicted landmark observations
      * @param observations Vector of landmark observations
      */
-    void dataAssociation(std::vector<LandmarkObs> predicted,
+    void dataAssociation(const std::vector<LandmarkObs> &predicted,
                          std::vector<LandmarkObs> &observations);
 
     /**
@@ -83,13 +103,13 @@ public:
                        const Map &map_landmarks);
 
     /**
-     * resample Resamples from the updated set of particles to form
-     *   the new set of particles.
+     * resample Resamples from the updated set of particles_ to form
+     *   the new set of particles_.
      */
     void resample();
 
     /**
-     * Set a particles list of associations, along with the associations'
+     * Set a particles_ list of associations, along with the associations'
      *   calculated world x,y coordinates
      * This can be a very useful debugging tool to make sure transformations
      *   are correct and assocations correctly connected
@@ -107,23 +127,23 @@ public:
     }
 
     /**
-     * Used for obtaining debugging information related to particles.
+     * Used for obtaining debugging information related to particles_.
      */
-    std::string getAssociations(const Particle& best);
+    std::string getAssociations(const Particle &best);
 
-    std::string getSenseCoord(const Particle& best, const std::string& coord);
+    std::string getSenseCoord(const Particle &best, const std::string &coord);
 
-    // Set of current particles
-    std::vector<Particle> particles;
+    // Set of current particles_
+    std::vector<Particle> particles_;
 
 private:
-    // Number of particles to draw
+    // Number of particles_ to draw
     int num_particles;
 
     // Flag, if filter is initialized
     bool is_initialized;
 
-    // Vector of weights of all particles
+    // Vector of weights of all particles_
     std::vector<double> weights;
 
     std::default_random_engine gen_{};
