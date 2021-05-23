@@ -23,21 +23,12 @@ using std::vector;
 
 void ParticleFilter::init(double x, double y, double theta, double std[])
 {
-    /**
-     * TODO: Set the number of particles. Initialize all particles to
-     *   first position (based on estimates of x, y, theta and their uncertainties
-     *   from GPS) and all weights to 1.
-     * TODO: Add random Gaussian noise to each particle.
-     * NOTE: Consult particle_filter.h for more information about this method
-     *   (and others in this file).
-     */
     num_particles = 100;  // TODO: Set the number of particles
 
     double std_x = std[0];
     double std_y = std[1];
     double std_theta = std[2];
 
-    std::default_random_engine gen{};
     std::normal_distribution<double> dist_x(x, std_x);
     std::normal_distribution<double> dist_y(y, std_y);
     std::normal_distribution<double> dist_theta(theta, std_theta);
@@ -45,9 +36,9 @@ void ParticleFilter::init(double x, double y, double theta, double std[])
     for (int i = 0; i < 100; ++i)
     {
         Particle p;
-        p.x = dist_x(gen);
-        p.y = dist_y(gen);
-        p.theta = angle_to_interval(dist_theta(gen));
+        p.x = dist_x(gen_);
+        p.y = dist_y(gen_);
+        p.theta = angle_to_interval(dist_theta(gen_));
         p.id = i;
         p.weight = 1;
         particles.push_back(std::move(p));
@@ -60,14 +51,34 @@ void ParticleFilter::init(double x, double y, double theta, double std[])
 void ParticleFilter::prediction(double delta_t, double std_pos[],
                                 double velocity, double yaw_rate)
 {
-    /**
-     * TODO: Add measurements to each particle and add random Gaussian noise.
-     * NOTE: When adding noise you may find std::normal_distribution
-     *   and std::default_random_engine useful.
-     *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
-     *  http://www.cplusplus.com/reference/random/default_random_engine/
-     */
+    double std_x = std_pos[0];
+    double std_y = std_pos[1];
+    double std_theta = std_pos[2];
 
+    std::normal_distribution<double> dist_x(0, std_x);
+    std::normal_distribution<double> dist_y(0, std_y);
+    std::normal_distribution<double> dist_theta(0, std_theta);
+
+    for (auto &p : this->particles)
+    {
+        if (std::abs(yaw_rate) < 1e-4)
+        {
+            p.x += velocity * delta_t * std::cos(p.theta);
+            p.y += velocity * delta_t * std::sin(p.theta);
+        }
+        else
+        {
+            p.x += (velocity / yaw_rate) *
+                   (std::sin(p.theta + yaw_rate * delta_t) - std::sin(p.theta));
+            p.y += (velocity / yaw_rate) *
+                   (std::cos(p.theta) - std::cos(p.theta + yaw_rate * delta_t));
+        }
+        p.theta += yaw_rate * delta_t;
+
+        p.x += dist_x(gen_);
+        p.y += dist_y(gen_);
+        p.theta += angle_to_interval(dist_theta(gen_));
+    }
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
@@ -81,6 +92,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
      *   probably find it useful to implement this method and use it as a helper
      *   during the updateWeights phase.
      */
+
 
 }
 
