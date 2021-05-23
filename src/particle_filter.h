@@ -32,7 +32,7 @@ class ParticleFilter {
   ParticleFilter() : num_particles(0), is_initialized(false) {}
 
   // Destructor
-  ~ParticleFilter() {}
+  ~ParticleFilter() = default;
 
   /**
    * init Initializes particle filter by initializing particles to Gaussian

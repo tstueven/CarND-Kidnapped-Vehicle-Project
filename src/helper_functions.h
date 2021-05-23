@@ -248,4 +248,9 @@ inline bool read_landmark_data(std::string filename,
   return true;
 }
 
+double angle_to_interval(double phi)
+{
+    return atan2(sin(phi), cos(phi));
+}
+
 #endif  // HELPER_FUNCTIONS_H_
